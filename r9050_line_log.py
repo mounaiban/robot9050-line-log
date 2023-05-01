@@ -90,27 +90,25 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
     TYPE_SEP = ':'
     TYPE_SEP_BYTES = b':'
     PREFIX_CONFIG = 'CFG'
-    PLACEHOLDER_RANDOM = b'random'  # substitute with random string
-    SALT_BYTES = 32
     SUPPORTED_HASH_FNS = {
         # NOTE: BLAKE2 tree hashing features are not used
         'blake2b' : {
             'digest_size': 16,
-            'key': PLACEHOLDER_RANDOM,
-            'salt': PLACEHOLDER_RANDOM,
-            'person': PLACEHOLDER_RANDOM,
+            'key': token_bytes(32),
+            'salt': token_bytes(16), # PROTIP: max 16B for b2b
+            'person': token_bytes(16), # PROTIP: max 16B for b2b
             'usedforsecurity': True,
         },
         'blake2s' : {
             'digest_size': 16,
-            'key': PLACEHOLDER_RANDOM,
-            'salt': PLACEHOLDER_RANDOM,
-            'person': PLACEHOLDER_RANDOM,
+            'key': token_bytes(32),
+            'salt': token_bytes(8), # PROTIP: max 8B for b2s
+            'person': token_bytes(8), # PROTIP: max 8B for b2s
             'usedforsecurity': True,
         },
         'md5' : {}, # NOTE: MD5 has been broken; use for tests only
         'scrypt': {
-            'salt': PLACEHOLDER_RANDOM,
+            'salt': token_bytes(64),
             'n': 64,
             'r': 8,
             'p': 2048,
@@ -297,8 +295,6 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
                     val = defaults[k]
                 else:
                     val = hashfn_config[k]
-                if val == self.PLACEHOLDER_RANDOM:
-                    val = token_bytes(self.SALT_BYTES)
                 self._put_config_item(f"{hfn}_{k}", val)
             self._connection.commit()
             return True
