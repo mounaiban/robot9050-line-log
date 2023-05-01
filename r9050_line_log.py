@@ -151,7 +151,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
         self._hashfn = None
         self._hashargs = None # TODO: less misleading than _hashcfg?
         action = ka.pop('action', 'open')
-        hashfn_config = ka.pop('hashfn_config', {})
+        hashfn_config = ka.pop('hashfn_config', None)
         self._connection = sqlite3.connect(**ka)
         self._cursor = self._connection.cursor()
         if action=='open':
@@ -262,13 +262,16 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
             raise sqlite3.DatabaseError('cursor-connection mismatch')
         elif self._cols_and_id_ok():
             raise ValueError('line log already exists at location')
+        # DB is ok, move on to configuration
+        elif not hashfn_config:
+            hashfn_config = {self.HASHFN_KEY: self.HASHFN_DEFAULT}
         elif self.HASHFN_KEY not in hashfn_config:
             raise KeyError(f'please specify the {self.HASHFN_KEY} argument')
         elif hashfn_config[self.HASHFN_KEY] not in self.SUPPORTED_HASH_FNS:
             raise KeyError(
                 f'hash function {hashfn_config[self.HASHFN_KEY]} not supported'
             )
-        elif self._cursor_ok():
+        if self._cursor_ok():
             tspec = f"{self.TABLE_COLS[0]} BLOB, {self.TABLE_COLS[1]}"
             # had to hardcode, only keys are blobs.
             sc_create = f"CREATE TABLE IF NOT EXISTS {self.TABLE_NAME}({tspec})"
