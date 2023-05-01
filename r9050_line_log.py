@@ -227,6 +227,10 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
         lbytes = bytes(line, encoding=self.ENCODING_LINES)
         return hashlib.blake2b(lbytes, **self._hashargs).digest()
 
+    def _get_hash_blake2s(self, line):
+        lbytes = bytes(line, encoding=self.ENCODING_LINES)
+        return hashlib.blake2s(lbytes, **self._hashargs).digest()
+
     def _get_hash_md5(self, line):
         lbytes = bytes(line, encoding=self.ENCODING_LINES)
         return hashlib.md5(lbytes).digest()
