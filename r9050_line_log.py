@@ -24,7 +24,8 @@ ROBOT9050 Line Log WIP
 #
 #
 # Please see README.rst for details.
-# This module uses spaces, not tabs. Python 3.6 (required f-strings)
+# This module uses spaces, not tabs.
+# Only for Python 3.6 or higher (requires f-strings and secrets).
 # There are notes at the bottom of this module.
 #
 
