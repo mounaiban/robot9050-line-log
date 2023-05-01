@@ -27,6 +27,78 @@ conditions`_ of the GNU General Public License, version 3 or later.
 
 .. _terms and conditions: https://www.gnu.org/licenses/gpl-3.0.html
 
+-----
+HOWTO
+-----
+
+Basics
+======
+
+First, create a line log database. Use the ``action`` argument with a
+string value ``'create'``. This example creates an in-memory SQLite 3
+Line Log, with a BLAKE2B hashing function:
+
+::
+
+  elog = Robot9050Sqlite3LineLog(database=':memory:', action='create')
+
+To create a persistent log in the file system, just use a filesystem
+path instead for ``database``:
+
+::
+
+  elog = Robot9050Sqlite3LineLog(database='elog.sqlite3', action='create')
+
+To open a file ``elog.sqlite3`` call:
+
+::
+
+  elog = RobotSqlite3LineLog(database='elog.sqlite3')
+
+The default action is ``open``, so there is no need to specify this in
+the arguments.
+
+To record lines, simply use the ``add`` method:
+
+::
+
+   elog.add('lol')
+
+Check the number of times a line has been recorded with ``lookup``:
+
+::
+
+   >>> elog.lookup('lol')
+   1
+
+   >>> elog.add('lol')
+   >>> elog.add('lol')
+   >>> elog.lookup('lol')
+   3
+
+Limitations
+===========
+
+The Line Log does not attempt to identify visually-similar but
+digitally distinct messages such as suffixes, additional spaces and
+similar-looking glyphs:
+
+::
+
+   >>> elog.add('lol')
+   >>> elog.lookup('lol 4529345')
+   0
+
+   >>> elog.lookup('𝓁𝒐𝓁')
+   0
+
+   >>> elog.lookup('lol ')
+   0
+
+If used as a part of an originality-enforcement system, additional
+pre-processing measures may be required to ensure the effectiveness
+of the system.
+
 ----
 TODO
 ----
