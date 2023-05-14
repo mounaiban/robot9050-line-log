@@ -53,6 +53,10 @@ class Robot9050LineLog:
     def get_hasher_config(self):
         raise NotImplementedError('TODO: Get hasher configuration')
 
+    @classmethod
+    def get_supported_hash_functions(self):
+        raise NotImplementedError('TODO: Get supported hash functions')
+
     def lookup(self, line):
         """
         Check if a string "line" has been added to the log, return
@@ -321,6 +325,10 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
                 val = self._get_config_item(f"{hfn}_{k}")
                 cfg[k] = type(spec[k])(val)
         return cfg
+
+    @classmethod
+    def get_supported_hash_functions(self):
+        return tuple(self.SUPPORTED_HASH_FNS)
 
     def lookup(self, line):
         # TODO: script is identical to _get_config_item's, consolidate?
