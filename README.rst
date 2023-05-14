@@ -34,6 +34,12 @@ HOWTO
 Basics
 ======
 
+To begin using the Line Log, import the line log module:
+
+::
+
+  from r9050_line_log import Robot9050Sqlite3LineLog
+
 First, create a line log database. Use the ``action`` argument with a
 string value ``'create'``. This example creates an in-memory SQLite 3
 Line Log, with a BLAKE2B hashing function:
