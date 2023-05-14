@@ -50,11 +50,11 @@ class Robot9050LineLog:
         """Check if database is a valid, identified Line Log"""
         raise NotImplementedError('TODO: Verify database is ready to use')
 
-    def get_hasher_config(self):
-        raise NotImplementedError('TODO: Get hasher configuration')
+    def get_hash_fn_config(self):
+        raise NotImplementedError('TODO: Get hash function configuration')
 
     @classmethod
-    def get_supported_hash_functions(self):
+    def get_supported_hash_fns(self):
         raise NotImplementedError('TODO: Get supported hash functions')
 
     def lookup(self, line):
@@ -87,7 +87,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
     ENCODING = 'ascii'
     ENCODING_LINES = 'utf16'
     FORMAT_VER = '1'  # string, to allow suffixes
-    HASHFN_KEY = 'hash_function'
+    HASHFN_KEY = 'hash_fn'
     HASHFN_DEFAULT = 'blake2b'
     LOG_ID = 'ID:ROBOT9050-line-log'
     TABLE_NAME = 'Robot9050LineLog'
@@ -140,7 +140,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
 
         xlog = Robot9050Sqlite3LineLog(
             action='create',
-            hashfn_config={'hash_function': 'blake2b'},
+            hashfn_config={'hash_fn': 'blake2b'},
             database='xlog.r9050_log'
         )
 
@@ -154,7 +154,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
         self._hashfn = None
         self._hashargs = None # TODO: less misleading than _hashcfg?
         action = ka.pop('action', 'open')
-        hashfn_config = ka.pop('hashfn_config', None)
+        hashfn_config = ka.pop('hash_fn_config', None)
         self._connection = sqlite3.connect(**ka)
         self._cursor = self._connection.cursor()
         if action=='open':
@@ -195,7 +195,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
 
     def _setup(self):
         """Load and apply configuration information"""
-        self._hashargs = self.get_hasher_config()
+        self._hashargs = self.get_hash_fn_config()
         hfn = self._hashargs.pop(self.HASHFN_KEY)
         self._hashfn = getattr(self, f'_get_hash_{hfn}')
 
@@ -284,7 +284,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
                 sc_mark,
                 (bytes(self.LOG_ID, encoding=self.ENCODING), self.FORMAT_VER,)
             )
-            # write hasher config
+            # write hash function config
             hfn: str
             if not hashfn_config:
                 hashfn_config = self.SUPPORTED_HASH_FNS[self.HASHFN_DEFAULT]
@@ -313,7 +313,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
             raise sqlite3.DatabaseError('cursor-connection mismatch')
         else: return self._cols_and_id_ok()
 
-    def get_hasher_config(self):
+    def get_hash_fn_config(self):
         cfg = {}
         hfn = self._get_config_item(self.HASHFN_KEY)
         if hfn not in self.SUPPORTED_HASH_FNS:
@@ -327,7 +327,7 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
         return cfg
 
     @classmethod
-    def get_supported_hash_functions(self):
+    def get_supported_hash_fns(self):
         return tuple(self.SUPPORTED_HASH_FNS)
 
     def lookup(self, line):

@@ -9,7 +9,7 @@ class InitTests(TestCase):
             testlog = Robot9050Sqlite3LineLog(
                 action='create',
                 database=':memory:',
-                hashfn_config={'hash_function': 'UNSUPPORTED_CRYPT'}
+                hash_fn_config={'hash_fn': 'UNSUPPORTED_CRYPT'}
             )
 
 class AddTests(TestCase):
@@ -35,7 +35,7 @@ class AddTests(TestCase):
                 testlog = Robot9050Sqlite3LineLog(
                     action='create',
                     database=':memory:',
-                    hashfn_config={'hash_function': f}
+                    hash_fn_config={'hash_fn': f}
                 )
                 testA = 'test_A'
                 testlog.add(testA)
