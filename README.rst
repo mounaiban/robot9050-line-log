@@ -82,6 +82,141 @@ Check the number of times a line has been recorded with ``lookup``:
    >>> elog.lookup('lol')
    3
 
+Choosing the Hash Function
+==========================
+
+The Line Log offers a selection of hashing functions. For now, only
+Python built-in hash functions from ``hashlib`` are supported.
+BLAKE2b with 128-bit hashes is the default hash function.
+
+Use the ``hash_fn_config`` argument to configure the hash function.
+This argument expects configuration information in dicts.
+
+Please note that the hash function may only be configured during the
+creation of the log; the hash function **cannot be changed later**.
+
+``hash_fn`` dict  Format
+------------------------
+
+There is only one mandatory option, ``hash_fn``, that selects the
+hashing function by its name as a string.
+
+::
+
+   {'hash_fn': HASH_FUNCTION}
+
+Call ``get_supported_hash_fns()`` for a list of acceptable choices for
+``HASH_FUNCTION``.
+
+Non-configurable hash functions
+-------------------------------
+
+Using MD5: ``{'hash_fn': 'md5'}``
+
+Using SHA-1: ``{'hash_fn': 'sha1'}``
+
+Using SHA-256: ``{'hash_fn': 'sha256'}``
+
+Using SHA-512: ``{'hash_fn': 'sha512'}``
+
+Example:
+
+::
+
+  sha256log = Robot9050Sqlite3LineLog(
+    database='sha256log.sqlite3',
+    action='create',
+    hash_fn_config={'hash_fn': 'sha256'}
+  )
+
+The MD5 function is not recommended for general public use, due to its
+weaknesses. `SHA-1's weaknesses`_ are currently not expected to be an
+issue in the short message hashing use cases of this software.
+
+.. _SHA-1's weaknesses: https://eprint.iacr.org/2020/014.pdf
+
+Configurable hash functions
+---------------------------
+
+Some functions are configurable; but each hash function has its own
+configurables. All configurables besides ``hash_fn`` are optional,
+defaults will be used in place of missing options.
+
+BLAKE2s
+
+::
+
+    {
+        'hash_fn': 'blake2s',
+        'digest_size': HASH_LENGTH,
+        'key': KEY_BYTES,
+        'salt': BYTES,
+        'person': BYTES,
+    }
+
+``DIGEST_SIZE`` is an int from 1 to 32 inclusive. ``BYTES`` is a byte
+array that may be up to 8 bytes long.
+
+BLAKE2b
+
+::
+
+    {
+        'hash_fn': 'blake2b',
+        'digest_size': HASH_LENGTH,
+        'key': KEY_BYTES,
+        'salt': BYTES,
+        'person': BYTES,
+    }
+
+``DIGEST_SIZE`` is an int from 1 to 64 inclusive.  ``BYTES`` is a byte
+array that may be up to 16 bytes long.
+
+`Scrypt`_
+
+::
+
+    {
+        'salt': SALT_BYTES,
+        'n': COST_FACTOR,
+        'r': BLOCK_SIZE_FACTOR,
+        'p': PARALLELIZATION,
+        'dklen': HASH_LENGTH,
+    }
+
+``COST_FACTOR`` must be a power of two (``math.log2(COST_FACTOR)``
+must be a whole number).
+
+Examples:
+
+::
+
+  b2slog = Robot9050Sqlite3LineLog(
+    database='blake2slog.sqlite3',
+    action='create',
+    hash_fn_config={
+        'hash_fn': 'blake2s',
+        'digest_size': 32
+    }
+  )
+
+  # This is a very slow hash log for your edutainment
+
+  scryptlog = Robot9050Sqlite3LineLog(
+    database='scryptlog.sqlite3',
+    action='create',
+    hash_fn_config={
+        'hash_fn': 'scrypt',
+        'n': 8192,
+        'r': 16,
+        'p': 4096,
+        'dklen': 128
+    }
+
+You may recognise that the keys and values in hash_fn_config directly mirror the arguments in the original hash functions.
+
+.. _Scrypt: https://en.wikipedia.org/wiki/Scrypt
+
 Limitations
 ===========
 
@@ -109,9 +244,9 @@ of the system.
 TODO
 ----
 
-* Command-line tool?
+* BLAKE3 Support?
 
-* Document hash function configuration in more detail
+* Command-line tool?
 
 * ``Robot9050RedisLineLog``: interface for Redis
 
