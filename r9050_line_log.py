@@ -134,13 +134,13 @@ class Robot9050Sqlite3LineLog(Robot9050LineLog):
 
         * action: 'create' or 'open'
 
-        * hashfn_config: dict containing hash function options
+        * hash_fn_config: dict containing hash function options
 
         Examples:
 
         xlog = Robot9050Sqlite3LineLog(
             action='create',
-            hashfn_config={'hash_fn': 'blake2b'},
+            hash_fn_config={'hash_fn': 'blake2b'},
             database='xlog.r9050_log'
         )
 
